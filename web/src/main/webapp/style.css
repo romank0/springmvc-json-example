@@ -1,0 +1,10 @@
+
+
+#messages {
+	border-width: 1px;
+}
+
+#error {
+	border-width: 1px;
+	color: red;
+}

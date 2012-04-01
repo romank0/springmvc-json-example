@@ -3,38 +3,54 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Simple IRC</title>
+
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+
 <script src="jquery.js"></script>
 <script type="text/javascript">
 
+	var error = function(message) {
+		$('#error').html(message);
+	}
 
-	$(document).ready(function() {
-	   
+	var refreshMessages = function(repeat) {
 		$.ajax({
-			url: "message/all",
+			url: "/api/message",
 		    success: function(response){
-		    	$('#messages').html(response);
-			    },  
+		    	var messages_html = "";
+		    	var i=0;
+		    	for (i=0;i<response.length;i++)
+		    	{
+		    		messages_html += "<div class='message'>"
+    					+ "<span class='text'>"
+    					+ response[i].text
+    					+ "</span>"
+    					+ "</div>";
+		    	}
+		    	$('#messages').html(messages_html);
+		    	if (repeat) {
+					setTimeout(function() { refreshMessages(true);}, 2000);
+				}
+			},  
 			error: function(e){  
-			      alert('Error: ' + e);  
+			      error('Error: ' + e);  
 			    }  
 			});
+	 };
+	 
+	$(document).ready(function() {
+		refreshMessages(true);
+	});
 	
-	 });
-
 	function sendMessage() {  
 	  var message = $('#message').val();
 	   
 	  $.ajax({  
 	    type: "POST",  
-	    url: "/message",  
-	    data: "name=" + name + "&education=" + education,  
-	    success: function(response){
-	      $('#info').html(response);
-	      $('#name').val('');
-	      $('#education').val('');
-	    },  
+	    url: "/api/message/" + message,   
+	    success: function() {refreshMessages(false);},  
 	    error: function(e){  
-	      alert('Error: ' + e);  
+	      error('Error: ' + e);  
 	    }  
 	  });  
 	}  
@@ -48,6 +64,8 @@
 		<tr><td colspan="2"><input type="button" value="Send" onclick="sendMessage()"><br/></td></tr>
 		<tr><td colspan="2"><div id="info" style="color: green;"></div></td></tr>
 	</table>
+	Recent messages:
 	<div id="messages"></div>
+	<div id="error"></div>
 </body>
 </html>
